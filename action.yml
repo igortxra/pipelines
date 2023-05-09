@@ -1,0 +1,17 @@
+name: 'Python Test Pipeline'
+description: 'Run python code tests and capture test coverage'
+inputs:
+  fail-under:  # id of input
+    description: 'Minimal percentage of test coverage to accept the passing tests'
+    default: 90
+outputs:
+#   comment-id:
+#     description: "Comment Id"
+#     value: ${{ steps.comment-creator.outputs.comment-id }}
+runs:
+  using: "composite"
+  steps:
+    - name: Run tests
+      shell: bash
+      run: |
+        source ./run.sh --install-poetry --comment-coverage --fail-under=${{ inputs.fail-under }}
