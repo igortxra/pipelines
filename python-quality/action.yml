@@ -1,0 +1,47 @@
+name: 'Quality pipeline'
+description: 'Run tests, test coverage, lint and security checks'
+inputs:
+  omit:
+    description: 'The files to omit in coverage report'
+    required: true
+    default: 'tests/*'
+  min_coverage:
+    description: 'The minimum required coverage'
+    required: true
+    default: 100
+  min_lint_rate:
+    description: 'The minimum required pylint rate'
+    required: true
+    default: 8.0
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      run: |
+        pip install pytest coverage pylint bandit
+      shell: bash
+
+    - name: Run tests
+      run: |
+        coverage run -m pytest -v
+      shell: bash
+
+    - name: Check Coverage
+      run: |
+        coverage report --omit=$OMIT --fail-under=$MIN_COVERAGE
+      env:
+        OMIT: ${{ inputs.omit }}
+        MIN_COVERAGE: ${{ inputs.min_coverage }}
+      shell: bash
+   
+    - name: Run lint
+      run: |
+        pylint --fail-under $MIN_LINT_RATE **/*.py
+      shell: bash
+      env:
+        MIN_LINT_RATE: ${{ inputs.min_lint_rate }} 
+        
+    - name: Run security check
+      run: |
+        bandit .
+      shell: bash
